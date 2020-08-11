@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 using ChatBlazorApp.Server.Hubs;
-using ChatBlazorApp.Server.Data;
 
 namespace ChatBlazorApp.Server
 {
@@ -32,9 +31,6 @@ namespace ChatBlazorApp.Server
 				opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
 					new[] { "application/octet-stream" });
 			});
-
-			services.AddSingleton<PreviousChatArchive>();
-
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
