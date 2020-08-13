@@ -1,23 +1,17 @@
 ﻿@page "/{RoomName}"
-@using Microsoft.AspNetCore.SignalR.Client
 @using ChatBlazorApp.Shared
-@inject NavigationManager NavigationManager
-@implements IDisposable
+@using Microsoft.AspNetCore.SignalR.Client
 @inject HttpClient Http
 
-<div class="form-group">
-	<label>
-		User:
-		<input @bind="userInput" />
-	</label>
-</div>
+<p>@AppState.UserName</p>
+
 <div class="form-group">
 	<label>
 		Message:
 		<input @bind="messageInput" size="50" />
 	</label>
 </div>
-<button @onclick="Send" disabled="@(!IsConnected)">Send</button>
+<button @onclick="Send" disabled="@(HubConnection.State != HubConnectionState.Connected)">Send</button>
 
 <hr>
 
@@ -30,7 +24,8 @@
 
 @code {
 	[Parameter] public string RoomName { get; set; }
-	private HubConnection hubConnection;
+	[CascadingParameter] public Microsoft.AspNetCore.SignalR.Client.HubConnection HubConnection { get; set; }
+
 	private List<string> messages = new List<string>();
 	private string userInput;
 	private string messageInput;
@@ -41,20 +36,7 @@
 		userInput = "";
 		messageInput = "";
 
-		hubConnection = new HubConnectionBuilder()
-			.WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
-			.Build();
-
-		hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
-		{
-			var encodedMsg = $"{user}: {message}";
-			messages.Add(encodedMsg);
-			StateHasChanged();
-		});
-
-		await hubConnection.StartAsync();
-
-		await hubConnection.SendAsync("JoinRoom", RoomName);
+		AppState.CurrentRoom = this;
 
 		var previousChats = await Http.GetFromJsonAsync<ChatData[]>($"Chat/{RoomName}");
 
@@ -68,14 +50,13 @@
 		}
 	}
 
-	Task Send() =>
-		hubConnection.SendAsync("SendMessage", userInput, messageInput, RoomName);
-
-	public bool IsConnected =>
-		hubConnection.State == HubConnectionState.Connected;
-
-	public void Dispose()
+	public void ReceiveMessage(string message)
 	{
-		_ = hubConnection.DisposeAsync();
+		messages.Add(message);
+		StateHasChanged();
 	}
+
+	Task Send() =>
+		HubConnection.SendAsync("SendMessage", AppState.UserName, messageInput, RoomName);
+
 }

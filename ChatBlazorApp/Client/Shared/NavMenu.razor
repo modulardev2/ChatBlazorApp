@@ -12,36 +12,29 @@
 				<span class="oi oi-home" aria-hidden="true"></span> Home
 			</NavLink>
 		</li>
-		<li class="nav-item px-3">
-			<NavLink class="nav-link" href="room1">
-				<span class="oi oi-plus" aria-hidden="true"></span> Room1
-			</NavLink>
-		</li>
-		<li class="nav-item px-3">
-			<NavLink class="nav-link" href="room2">
-				<span class="oi oi-list-rich" aria-hidden="true"></span> Room2
-			</NavLink>
-		</li>
-		<li class="nav-item px-3">
-			<NavLink class="nav-link" href="room3">
-				<span class="oi oi-list-rich" aria-hidden="true"></span> Room3
-			</NavLink>
-		</li>
-		<li class="nav-item px-3">
-			<NavLink class="nav-link" href="room4">
-				<span class="oi oi-list-rich" aria-hidden="true"></span> Room4
-			</NavLink>
-		</li>
+		@foreach (var room in AppState.Rooms)
+		{
+			<li class="nav-item px-3">
+				<NavLink class="nav-link" href="@room">
+					<span class="oi oi-plus" aria-hidden="true"></span> @room
+				</NavLink>
+			</li>
+		}
 	</ul>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
+	private bool collapseNavMenu = true;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+	private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+	private void ToggleNavMenu()
+	{
+		collapseNavMenu = !collapseNavMenu;
+	}
+
+	protected override void OnInitialized()
+	{
+		AppState.AppStateUpdated += StateHasChanged;
+	}
 }

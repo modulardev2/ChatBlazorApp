@@ -1,7 +1,48 @@
 ﻿@page "/"
 
+@code {
+	protected override void OnInitialized()
+	{
+		appState.UserName = AppState.UserName;
+		appState.Rooms.AddRange(AppState.Rooms);
+	}
+
+	private void FormSubmit()
+	{
+		AppState.UserName = appState.UserName;
+		AppState.Rooms = new List<string>();
+
+		string[] splitArray = appState.RoomsCommaSeperated.Split(',');
+
+		AppState.Rooms.AddRange(splitArray.Select(n => n.Trim()));
+
+		Console.WriteLine("Joining rooms... " + string.Join(',', AppState.Rooms));
+
+		AppState.RoomsCommaSeperated = appState.RoomsCommaSeperated;
+
+		formText = "Form submitted successfully!";
+
+		AppState.AppStateUpdated?.Invoke();
+	}
+
+	AppState appState = new AppState();
+	string formText = "";
+
+}
+
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+<EditForm Model="@appState" OnSubmit="FormSubmit" >
+	<label>User Name:</label>
+	<InputText @bind-Value="@appState.UserName" />
+	<br />
+	<label>Rooms:</label>
+	<InputText @bind-Value="@appState.RoomsCommaSeperated" />
+	<br />
+	<button type="submit">Submit Form</button>
+	<p>@formText</p>
+</EditForm>
 
 <SurveyPrompt Title="How is Blazor working for you?" />

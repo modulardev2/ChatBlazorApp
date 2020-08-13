@@ -36,7 +36,7 @@ namespace ChatBlazorApp.Server.Hubs
 				previousChatArchive.Chats.Add(roomName, new List<Shared.ChatData> { chatData });
 			}
 			
-            await Clients.Group(roomName).SendAsync("ReceiveMessage", user, message);
+            await Clients.Group(roomName).SendAsync("ReceiveMessage", user, message, roomName);
 		}
     }
 }

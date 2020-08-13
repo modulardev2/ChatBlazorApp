@@ -1,15 +1,78 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
 <div class="sidebar">
-    <NavMenu />
+	<NavMenu />
 </div>
 
 <div class="main">
-    <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-    </div>
+	<div class="top-row px-4">
+		<a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+	</div>
 
-    <div class="content px-4">
-        @Body
-    </div>
+	<div class="content px-4">
+		<CascadingValue Value="hubConnection">
+			@Body
+		</CascadingValue>
+	</div>
 </div>
+
+@code {
+	private HubConnection hubConnection;
+	private List<string> roomsJoined = new List<string>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		AppState.AppStateUpdated += async () =>
+		{
+			var newRooms = new List<string>();
+			foreach (var room in AppState.Rooms)
+			{
+				if (!roomsJoined.Contains(room))
+				{
+					newRooms.Add(room);
+				}
+			}
+
+			roomsJoined.AddRange(newRooms);
+
+			foreach (var room in newRooms)
+			{
+				await hubConnection.SendAsync("JoinRoom", room);
+			}
+		};
+
+		hubConnection = new HubConnectionBuilder()
+			.WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+			.Build();
+
+		hubConnection.On<string, string, string>("ReceiveMessage", (user, message, roomName) =>
+		{
+			if (AppState.CurrentRoom?.RoomName == roomName)
+			{
+				var encodedMsg = $"{user}: {message}";
+				AppState.CurrentRoom.ReceiveMessage(encodedMsg);
+			}
+			else
+			{
+				// Notification by that room. 
+			}
+		});
+
+		await hubConnection.StartAsync();
+
+		//
+	}
+
+	public bool IsConnected =>
+		hubConnection.State == HubConnectionState.Connected;
+
+	public void Dispose()
+	{
+		_ = hubConnection.DisposeAsync();
+	}
+
+
+}
