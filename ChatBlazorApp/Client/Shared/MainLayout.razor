@@ -27,14 +27,7 @@
 	{
 		AppState.AppStateUpdated += async () =>
 		{
-			var newRooms = new List<string>();
-			foreach (var room in AppState.Rooms)
-			{
-				if (!roomsJoined.Contains(room))
-				{
-					newRooms.Add(room);
-				}
-			}
+			var newRooms = AppState.Rooms.Where(n => !roomsJoined.Contains(n.Key)).Select(n => n.Key).ToList();
 
 			roomsJoined.AddRange(newRooms);
 
@@ -57,7 +50,13 @@
 			}
 			else
 			{
-				// Notification by that room. 
+				// Notification by that room.
+				if (AppState.Rooms.ContainsKey(roomName))
+				{
+					Console.WriteLine("Notification Increasing");
+					AppState.Rooms[roomName] = AppState.Rooms[roomName] + 1;
+					AppState.AppStateUpdated?.Invoke();
+				}
 			}
 		});
 

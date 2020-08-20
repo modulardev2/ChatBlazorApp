@@ -23,6 +23,7 @@
 </ul>
 
 @code {
+	string previousRoomName = "";
 	[Parameter] public string RoomName { get; set; }
 	[CascadingParameter] public Microsoft.AspNetCore.SignalR.Client.HubConnection HubConnection { get; set; }
 
@@ -32,9 +33,18 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
+		if (RoomName == previousRoomName)
+			return;
+		previousRoomName = RoomName;
 		messages.Clear();
 		userInput = "";
 		messageInput = "";
+
+		if (AppState.Rooms.ContainsKey(RoomName))
+		{
+			AppState.Rooms[RoomName] = 0;
+			AppState.AppStateUpdated?.Invoke();
+		}
 
 		AppState.CurrentRoom = this;
 

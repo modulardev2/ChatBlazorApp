@@ -10,7 +10,8 @@ namespace ChatBlazorApp.Client
     public class AppState
     {
         public string UserName { get; set; }
-        public List<string> Rooms { get; set; } = new List<string>();
+
+        public Dictionary<string, int> Rooms = new Dictionary<string, int>();
 
         public string RoomsCommaSeperated { get; set; }
 

@@ -4,17 +4,24 @@
 	protected override void OnInitialized()
 	{
 		appState.UserName = AppState.UserName;
-		appState.Rooms.AddRange(AppState.Rooms);
+
+		foreach (var pair in AppState.Rooms)
+		{
+			appState.Rooms.Add(pair.Key, pair.Value);
+		}
 	}
 
 	private void FormSubmit()
 	{
 		AppState.UserName = appState.UserName;
-		AppState.Rooms = new List<string>();
+		AppState.Rooms = new Dictionary<string, int>();
 
 		string[] splitArray = appState.RoomsCommaSeperated.Split(',');
 
-		AppState.Rooms.AddRange(splitArray.Select(n => n.Trim()));
+		foreach (string s in splitArray)
+		{
+			AppState.Rooms.Add(s, 0);
+		}
 
 		Console.WriteLine("Joining rooms... " + string.Join(',', AppState.Rooms));
 
